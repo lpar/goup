@@ -22,7 +22,7 @@ import (
 )
 
 const destDir = "/usr/local"
-const clientTimeout = 10 * time.Second
+const clientTimeout = 5 * 60 * time.Second
 
 const dlBase = "https://dl.google.com/go/"
 const dlJSONfeed = "https://golang.org/dl/?mode=json"
