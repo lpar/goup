@@ -55,7 +55,7 @@ func pickBestVersion(targetOS string, targetArch string) (*GoVersion, *GoDownloa
 	var bestVersion *GoVersion
 	var bestDownload *GoDownload
 	client := http.Client{
-		Timeout: time.Second * 3,
+		Timeout: clientTimeout,
 	}
 	req, err := http.NewRequest(http.MethodGet, dlJSONfeed, nil)
 	if err != nil {
