@@ -271,7 +271,7 @@ func downloadFile(dl *GoDownload) (string, string, error) {
 func fixPermissions(root string) error {
 	return filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
 		perms := info.Mode()
-		perms = perms | 0444
+		perms = (perms & 0777) | 0444
 		cherr := os.Chmod(path, perms)
 		if cherr != nil {
 			return fmt.Errorf("can't chmod %###o %s", perms, path)
