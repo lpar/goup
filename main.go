@@ -192,15 +192,6 @@ func main() {
 
 }
 
-func pickArchiver(fpath string) archiver.Archiver {
-	for _, format := range archiver.SupportedFormats {
-		if format.Match(fpath) {
-			return format
-		}
-	}
-	return nil
-}
-
 // Download a file and return the temporary filename where it's stored and its SHA256 checksum.
 // If the download fails for any reason, attempt to clean up the temporary file.
 func downloadFile(dl *GoDownload) (string, string, error) {
@@ -281,9 +272,13 @@ func fixPermissions(root string) error {
 }
 
 func downloadAndInstall(dl *GoDownload) error {
-	unpacker := pickArchiver(dl.Filename)
-	if unpacker == nil {
-		return fmt.Errorf("don't know how to unpack %s", dl.Filename)
+	unpacker, err := archiver.ByExtension(dl.Filename)
+	if err != nil {
+		return fmt.Errorf("don't know how to unpack %s: %v", dl.Filename, err)
+	}
+	u, ok := unpacker.(archiver.Unarchiver)
+	if !ok {
+		return fmt.Errorf("format specified by source filename is not an archive format: %s (%T)", dl.Filename, unpacker)
 	}
 	tmpfile, shasum, err := downloadFile(dl)
 	if err != nil {
@@ -301,7 +296,7 @@ func downloadAndInstall(dl *GoDownload) error {
 			return fmt.Errorf("can't rename %s to %s: %v", godir, bakgo, err)
 		}
 	}
-	err = unpacker.Open(tmpfile, *destGoDir)
+	err = u.Unarchive(tmpfile, *destGoDir)
 	if err != nil {
 		return fmt.Errorf("can't unpack %s to %s: %v", tmpfile, godir, err)
 	}
