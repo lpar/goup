@@ -90,7 +90,7 @@ func pickBestVersion(targetOS string, targetArch string) (*GoVersion, *GoDownloa
 			}
 		}
 	}
-	return bestVersion, bestDownload, fmt.Errorf("no availableVersions found for %s/%s", targetOS, targetArch)
+	return bestVersion, bestDownload, fmt.Errorf("no available versions found for %s/%s", targetOS, targetArch)
 }
 
 func pickBestFile(gv GoVersion, targetOS string, targetArch string) (*GoDownload, error) {
@@ -153,7 +153,7 @@ func main() {
 
 	newVersion, newDownload, err := pickBestVersion(targetOS, targetArch)
 	if err != nil {
-		fmt.Printf("Couldn't check for new versions: %v", err)
+		fmt.Printf("Couldn't check for new versions: %v\n", err)
 		return
 	}
 	newSemVer := semver.NewSemVer(newVersion.Version)
@@ -276,10 +276,13 @@ func downloadAndInstall(dl *GoDownload) error {
 	if err != nil {
 		return fmt.Errorf("don't know how to unpack %s: %v", dl.Filename, err)
 	}
-	u, ok := unpacker.(archiver.Unarchiver)
+	// *archiver.TarGz is the archiver (and Unarchiver) type for the linux and macOS tarballs.
+	TarGzArchiver, ok := unpacker.(*archiver.TarGz)
 	if !ok {
-		return fmt.Errorf("format specified by source filename is not an archive format: %s (%T)", dl.Filename, unpacker)
+		return fmt.Errorf("The archiver type specified by source filename is not of type (*archiver.TarGz). Filename: %s specifies (%T)", dl.Filename, unpacker)
 	}
+	TarGzArchiver.OverwriteExisting = true
+
 	tmpfile, shasum, err := downloadFile(dl)
 	if err != nil {
 		return fmt.Errorf("download failed: %v", err)
@@ -296,7 +299,7 @@ func downloadAndInstall(dl *GoDownload) error {
 			return fmt.Errorf("can't rename %s to %s: %v", godir, bakgo, err)
 		}
 	}
-	err = u.Unarchive(tmpfile, *destGoDir)
+	err = TarGzArchiver.Unarchive(tmpfile, *destGoDir)
 	if err != nil {
 		return fmt.Errorf("can't unpack %s to %s: %v", tmpfile, godir, err)
 	}
