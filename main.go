@@ -263,6 +263,9 @@ func fixPermissions(root string) error {
 	return filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
 		perms := info.Mode()
 		perms = (perms & 0777) | 0444
+		if info.IsDir() {
+			perms = perms | 0111
+		}
 		cherr := os.Chmod(path, perms)
 		if cherr != nil {
 			return fmt.Errorf("can't chmod %###o %s", perms, path)
@@ -290,7 +293,7 @@ func downloadAndInstall(dl *GoDownload) error {
 	fmt.Println("Downloaded and SHA256 verified")
 	godir := filepath.Join(*destGoDir, "go")
 	bakgo := filepath.Join(*destGoDir, "go.bak")
-	if _, err = os.Stat(godir); os.IsExist(err) {
+	if _, err = os.Stat(godir); !os.IsNotExist(err) {
 		err = os.Rename(godir, bakgo)
 		if err != nil {
 			return fmt.Errorf("can't rename %s to %s: %v", godir, bakgo, err)
