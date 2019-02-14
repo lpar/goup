@@ -185,7 +185,12 @@ func main() {
 		return
 	}
 
-	err = downloadAndInstall(newDownload)
+	unarchiver, err := getUnarchiver(newDownload.Filename)
+	if err != nil {
+		fmt.Printf("Failed to retrieve an unarchiver: %v\n", err)
+	}
+
+	err = downloadAndInstall(newDownload, unarchiver)
 	if err != nil {
 		fmt.Printf("Error: %v\n", err)
 	}
@@ -271,18 +276,26 @@ func fixPermissions(root string) error {
 	})
 }
 
-func downloadAndInstall(dl *GoDownload) error {
-	unpacker, err := archiver.ByExtension(dl.Filename)
+func getUnarchiver(downloadFileName string) (archiver.Unarchiver, error) {
+	unpacker, err := archiver.ByExtension(downloadFileName)
 	if err != nil {
-		return fmt.Errorf("don't know how to unpack %s: %v", dl.Filename, err)
+		return nil, fmt.Errorf("don't know how to unpack %s: %v", downloadFileName, err)
 	}
+	switch unpacker.(type) {
 	// *archiver.TarGz is the archiver (and Unarchiver) type for the linux and macOS tarballs.
-	TarGzArchiver, ok := unpacker.(*archiver.TarGz)
-	if !ok {
-		return fmt.Errorf("The archiver type specified by source filename is not of type (*archiver.TarGz). Filename: %s specifies (%T)", dl.Filename, unpacker)
+	case *archiver.TarGz:
+		u := unpacker.(*archiver.TarGz)
+		u.OverwriteExisting = true
+		return u, nil
+	case archiver.Unarchiver:
+		u := unpacker.(archiver.Unarchiver)
+		return u, nil
+	default:
+		return nil, fmt.Errorf("format specified by source filename is not an archive format: %s (%T)", downloadFileName, unpacker)
 	}
-	TarGzArchiver.OverwriteExisting = true
+}
 
+func downloadAndInstall(dl *GoDownload, unpacker archiver.Unarchiver) error {
 	tmpfile, shasum, err := downloadFile(dl)
 	if err != nil {
 		return fmt.Errorf("download failed: %v", err)
@@ -299,7 +312,7 @@ func downloadAndInstall(dl *GoDownload) error {
 			return fmt.Errorf("can't rename %s to %s: %v", godir, bakgo, err)
 		}
 	}
-	err = TarGzArchiver.Unarchive(tmpfile, *destGoDir)
+	err = unpacker.Unarchive(tmpfile, *destGoDir)
 	if err != nil {
 		return fmt.Errorf("can't unpack %s to %s: %v", tmpfile, godir, err)
 	}
