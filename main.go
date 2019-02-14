@@ -272,15 +272,8 @@ func fixPermissions(root string) error {
 }
 
 func downloadAndInstall(dl *GoDownload) error {
-	unpacker, err := archiver.ByExtension(dl.Filename)
-	if err != nil {
-		return fmt.Errorf("don't know how to unpack %s: %v", dl.Filename, err)
-	}
 	// *archiver.TarGz is the archiver (and Unarchiver) type for the linux and macOS tarballs.
-	TarGzArchiver, ok := unpacker.(*archiver.TarGz)
-	if !ok {
-		return fmt.Errorf("The archiver type specified by source filename is not of type (*archiver.TarGz). Filename: %s specifies (%T)", dl.Filename, unpacker)
-	}
+	TarGzArchiver := archiver.NewTarGz()
 	TarGzArchiver.OverwriteExisting = true
 
 	tmpfile, shasum, err := downloadFile(dl)
