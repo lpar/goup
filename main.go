@@ -299,23 +299,25 @@ func downloadAndInstall(dl *GoDownload) error {
 			return fmt.Errorf("can't rename %s to %s: %v", godir, bakgo, err)
 		}
 	}
-	err = u.Unarchive(tmpfile, *destGoDir)
-	if err != nil {
+	gocachedir := filepath.Join(*destGoDir, "gocache")
+	if _, err = os.Stat(gocachedir); !os.IsNotExist(err) {
+		if err = os.RemoveAll(gocachedir); err != nil {
+			return fmt.Errorf("couldn't remove gocache version in %s: %v", gocachedir, err)
+		}
+	}
+	if err = u.Unarchive(tmpfile, *destGoDir); err != nil {
 		return fmt.Errorf("can't unpack %s to %s: %v", tmpfile, godir, err)
 	}
 	if _, err = os.Stat(godir); err != nil {
 		return fmt.Errorf("problem unpacking to %s, old go version is in %s", godir, bakgo)
 	}
-	err = os.Remove(tmpfile)
-	if err != nil {
+	if err = os.Remove(tmpfile); err != nil {
 		fmt.Fprintf(os.Stderr, "couldn't remove temporary file %s: %v", tmpfile, err)
 	}
-	err = os.RemoveAll(bakgo)
-	if err != nil {
+	if err = os.RemoveAll(bakgo); err != nil {
 		fmt.Fprintf(os.Stderr, "couldn't remove old Go version in %s: %v", bakgo, err)
 	}
-	err = fixPermissions(godir)
-	if err != nil {
+	if err = fixPermissions(godir); err != nil {
 		return fmt.Errorf("error installing: %v", err)
 	}
 	fmt.Println("Go upgraded successfully")
