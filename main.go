@@ -313,14 +313,23 @@ func downloadAndInstall(dl *GoDownload) error {
 	if _, err = os.Stat(godir); err != nil {
 		return fmt.Errorf("problem unpacking to %s, old go version is in %s", godir, bakgo)
 	}
+	// If the gocache directory exists in the go install folder.
+	if _, err = os.Stat(gocachedir); !os.IsNotExist(err) {
+		if _, err = os.Stat(gocachedir); err != nil {
+			return fmt.Errorf("problem unpacking to %s, old go cache version is in %s", gocachedir, bakgocache)
+		}
+	}
 	if err = os.Remove(tmpfile); err != nil {
 		fmt.Fprintf(os.Stderr, "couldn't remove temporary file %s: %v", tmpfile, err)
 	}
 	if err = os.RemoveAll(bakgo); err != nil {
 		fmt.Fprintf(os.Stderr, "couldn't remove old Go version in %s: %v", bakgo, err)
 	}
-	if err = os.RemoveAll(bakgocache); err != nil {
-		fmt.Fprintf(os.Stderr, "couldn't remove old Go cache version in %s: %v", bakgocache, err)
+	// If the bakgocache directory exists in the go install folder.
+	if _, err = os.Stat(bakgocache); !os.IsNotExist(err) {
+		if err = os.RemoveAll(bakgocache); err != nil {
+			fmt.Fprintf(os.Stderr, "couldn't remove old Go cache version in %s: %v", bakgocache, err)
+		}
 	}
 	if err = fixPermissions(godir); err != nil {
 		return fmt.Errorf("error installing: %v", err)
