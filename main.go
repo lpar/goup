@@ -277,9 +277,9 @@ func fixPermissions(root string) error {
 func downloadAndInstall(dl *GoDownload) error {
 	tmpfile, shasum, err := downloadFile(dl)
 	if err != nil {
-		return fmt.Errorf("tmpfile download failed: %v", err)
+		return fmt.Errorf("temporary file download failed: %v", err)
 	}
-	fmt.Printf("tmpfile downloaded successfully into %v\n", tmpfile)
+	fmt.Printf("Temporary file downloaded successfully into %v\n", tmpfile)
 	if shasum != dl.SHA256 {
 		return fmt.Errorf("bad checksum, expected %s got %s", dl.SHA256, shasum)
 	}
