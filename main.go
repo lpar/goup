@@ -275,14 +275,6 @@ func fixPermissions(root string) error {
 }
 
 func downloadAndInstall(dl *GoDownload) error {
-	unpacker, err := archiver.ByExtension(dl.Filename)
-	if err != nil {
-		return fmt.Errorf("don't know how to unpack %s: %v", dl.Filename, err)
-	}
-	u, ok := unpacker.(archiver.Unarchiver)
-	if !ok {
-		return fmt.Errorf("format specified by source filename is not an archive format: %s (%T)", dl.Filename, unpacker)
-	}
 	tmpfile, shasum, err := downloadFile(dl)
 	if err != nil {
 		return fmt.Errorf("download failed: %v", err)
@@ -305,7 +297,7 @@ func downloadAndInstall(dl *GoDownload) error {
 			return fmt.Errorf("couldn't remove gocache version in %s: %v", gocachedir, err)
 		}
 	}
-	if err = u.Unarchive(tmpfile, *destGoDir); err != nil {
+	if err = archiver.Unarchive(tmpfile, *destGoDir); err != nil {
 		return fmt.Errorf("can't unpack %s to %s: %v", tmpfile, godir, err)
 	}
 	if _, err = os.Stat(godir); err != nil {
