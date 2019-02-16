@@ -277,13 +277,10 @@ func fixPermissions(root string) error {
 func downloadAndInstall(dl *GoDownload) error {
 	tmpfile, shasum, err := downloadFile(dl)
 	if err != nil {
-		return fmt.Errorf("download failed: %v", err)
+		return fmt.Errorf("tmpfile download failed: %v", err)
+	} else {
+		fmt.Printf("tmpfile downloaded successfully into %v\n", tmpfile)
 	}
-	defer func() {
-		if err = os.Remove(tmpfile); err != nil {
-			fmt.Fprintf(os.Stderr, "couldn't remove temporary file %s: %v", tmpfile, err)
-		}
-	}()
 	if shasum != dl.SHA256 {
 		return fmt.Errorf("bad checksum, expected %s got %s", dl.SHA256, shasum)
 	}
@@ -307,6 +304,9 @@ func downloadAndInstall(dl *GoDownload) error {
 	}
 	if _, err = os.Stat(godir); err != nil {
 		return fmt.Errorf("problem unpacking to %s, old go version is in %s", godir, bakgo)
+	}
+	if err = os.Remove(tmpfile); err != nil {
+		fmt.Fprintf(os.Stderr, "couldn't remove temporary file %s: %v", tmpfile, err)
 	}
 	if err = os.RemoveAll(bakgo); err != nil {
 		fmt.Fprintf(os.Stderr, "couldn't remove old Go version in %s: %v", bakgo, err)
