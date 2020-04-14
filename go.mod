@@ -1,5 +1,7 @@
 module github.com/lpar/goup
 
+go 1.14
+
 require (
 	github.com/dsnet/compress v0.0.0-20171208185109-cc9eb1d7ad76 // indirect
 	github.com/golang/snappy v0.0.0-20180518054509-2e65f85255db // indirect
