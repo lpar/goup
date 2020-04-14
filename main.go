@@ -292,12 +292,6 @@ func downloadAndInstall(dl *GoDownload) error {
 			return fmt.Errorf("can't rename %s to %s: %v", godir, bakgo, err)
 		}
 	}
-	gocachedir := filepath.Join(*destGoDir, "gocache")
-	if _, err = os.Stat(gocachedir); !os.IsNotExist(err) {
-		if err = os.RemoveAll(gocachedir); err != nil {
-			return fmt.Errorf("couldn't remove gocache version in %s: %v", gocachedir, err)
-		}
-	}
 	if err = archiver.Unarchive(tmpfile, *destGoDir); err != nil {
 		return fmt.Errorf("can't unpack %s to %s: %v", tmpfile, godir, err)
 	}
