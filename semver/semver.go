@@ -1,3 +1,5 @@
+// Package semver implements semver-style version numbers, with support for
+// greater-than, less-than and equals comparisons.
 package semver
 
 import (
@@ -7,6 +9,7 @@ import (
 	"strings"
 )
 
+// SemVer represents a SemVer-standard version number.
 type SemVer struct {
 	Major int
 	Minor int
@@ -15,6 +18,7 @@ type SemVer struct {
 
 var semverRE = regexp.MustCompile(`\d+\.\d+(\.\d+)?`)
 
+// parse parses a version string into a SemVer struct.
 func parse(sv string) SemVer {
 	v := semverRE.FindString(sv)
 	xx := strings.Split(v+".0.0", ".")
@@ -28,6 +32,7 @@ func parse(sv string) SemVer {
 	}
 }
 
+// NewSemVer creates a SemVer struct from a version string.
 func NewSemVer(x string) SemVer {
 	return parse(x)
 }
@@ -38,8 +43,8 @@ func (a SemVer) String() string {
 
 func (a SemVer) Equals(b SemVer) bool {
 	if a.Major == b.Major &&
-		a.Minor == b.Minor &&
-		a.Patch == b.Patch {
+			a.Minor == b.Minor &&
+			a.Patch == b.Patch {
 		return true
 	}
 	return false

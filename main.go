@@ -16,9 +16,10 @@ import (
 	"sort"
 	"time"
 
-	"github.com/lpar/goup/semver"
 	"github.com/mholt/archiver"
 	flag "github.com/spf13/pflag"
+
+	"github.com/lpar/goup/semver"
 )
 
 const destDir = "/usr/local"
@@ -59,21 +60,21 @@ func pickBestVersion(targetOS string, targetArch string) (*GoVersion, *GoDownloa
 	}
 	req, err := http.NewRequest(http.MethodGet, dlJSONfeed, nil)
 	if err != nil {
-		return bestVersion, bestDownload, fmt.Errorf("can't create HTTP request: %v", err)
+		return bestVersion, bestDownload, fmt.Errorf("can't create HTTP request: %w", err)
 	}
 	req.Header.Set("Accept", "application/json")
 	resp, err := client.Do(req)
 	if err != nil {
-		return bestVersion, bestDownload, fmt.Errorf("request failed: %v", err)
+		return bestVersion, bestDownload, fmt.Errorf("request failed: %w", err)
 	}
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return bestVersion, bestDownload, fmt.Errorf("can't read body: %v", err)
+		return bestVersion, bestDownload, fmt.Errorf("can't read body: %w", err)
 	}
 	var availableVersions []GoVersion
 	err = json.Unmarshal(body, &availableVersions)
 	if err != nil {
-		return bestVersion, bestDownload, fmt.Errorf("can't parse JSON: %v", err)
+		return bestVersion, bestDownload, fmt.Errorf("can't parse JSON: %w", err)
 	}
 	sort.Slice(availableVersions, func(i, j int) bool {
 		v1 := semver.NewSemVer(availableVersions[i].Version)
@@ -111,7 +112,7 @@ func getCurrentGoVersion() (string, string, string, error) {
 	if err != nil {
 		out, err = exec.Command("go", "version").Output()
 		if err != nil {
-			return ver, opsys, arch, fmt.Errorf("can't run %s to check version: %v", gobin, err)
+			return ver, opsys, arch, fmt.Errorf("can't run %s to check version: %w", gobin, err)
 		}
 	}
 	gover := regexp.MustCompile(`go version go([\d.]+) (\w+)/(\w+)`)
@@ -208,7 +209,7 @@ func downloadFile(dl *GoDownload) (string, string, error) {
 	srcurl := dlBase + dl.Filename
 	u, err := url.Parse(srcurl)
 	if err != nil {
-		return tmpfile, ssha, fmt.Errorf("can't parse download URL %s: %v", srcurl, err)
+		return tmpfile, ssha, fmt.Errorf("can't parse download URL %s: %w", srcurl, err)
 	}
 	fname := filepath.Base(u.Path)
 	fmt.Printf("Downloading %s\n", fname)
@@ -216,7 +217,7 @@ func downloadFile(dl *GoDownload) (string, string, error) {
 	fp, err := os.OpenFile(tmpfile, os.O_CREATE|os.O_RDWR|os.O_APPEND, 0600)
 	if err != nil {
 		cleanup()
-		return tmpfile, ssha, fmt.Errorf("can't open temporary file %s: %v", tmpfile, err)
+		return tmpfile, ssha, fmt.Errorf("can't open temporary file %s: %w", tmpfile, err)
 	}
 	client := http.Client{
 		Timeout: clientTimeout,
@@ -224,12 +225,12 @@ func downloadFile(dl *GoDownload) (string, string, error) {
 	req, err := http.NewRequest(http.MethodGet, srcurl, nil)
 	if err != nil {
 		cleanup()
-		return tmpfile, ssha, fmt.Errorf("can't create HTTP request: %v", err)
+		return tmpfile, ssha, fmt.Errorf("can't create HTTP request: %w", err)
 	}
 	resp, err := client.Do(req)
 	if err != nil {
 		cleanup()
-		return tmpfile, ssha, fmt.Errorf("download request failed: %v", err)
+		return tmpfile, ssha, fmt.Errorf("download request failed: %w", err)
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
@@ -239,12 +240,12 @@ func downloadFile(dl *GoDownload) (string, string, error) {
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		cleanup()
-		return tmpfile, ssha, fmt.Errorf("can't read body: %v", err)
+		return tmpfile, ssha, fmt.Errorf("can't read body: %w", err)
 	}
 	nbytes, err := fp.Write(body)
 	if err != nil {
 		cleanup()
-		return tmpfile, ssha, fmt.Errorf("can't write downloaded data to %s: %v", tmpfile, err)
+		return tmpfile, ssha, fmt.Errorf("can't write downloaded data to %s: %w", tmpfile, err)
 	}
 	if nbytes != dl.Size {
 		return tmpfile, ssha, fmt.Errorf("wrong download size, expected %d bytes, got %d", dl.Size, nbytes)
@@ -252,7 +253,7 @@ func downloadFile(dl *GoDownload) (string, string, error) {
 	err = fp.Close()
 	if err != nil {
 		cleanup()
-		return tmpfile, ssha, fmt.Errorf("can't close %s: %v", tmpfile, err)
+		return tmpfile, ssha, fmt.Errorf("can't close %s: %w", tmpfile, err)
 	}
 	bsha := sha256.Sum256(body)
 	ssha = hex.EncodeToString(bsha[:])
@@ -277,7 +278,7 @@ func fixPermissions(root string) error {
 func downloadAndInstall(dl *GoDownload) error {
 	tmpfile, shasum, err := downloadFile(dl)
 	if err != nil {
-		return fmt.Errorf("temporary file download failed: %v", err)
+		return fmt.Errorf("temporary file download failed: %w", err)
 	}
 	fmt.Printf("Temporary file downloaded successfully into %v\n", tmpfile)
 	if shasum != dl.SHA256 {
@@ -289,11 +290,11 @@ func downloadAndInstall(dl *GoDownload) error {
 	if _, err = os.Stat(godir); !os.IsNotExist(err) {
 		err = os.Rename(godir, bakgo)
 		if err != nil {
-			return fmt.Errorf("can't rename %s to %s: %v", godir, bakgo, err)
+			return fmt.Errorf("can't rename %s to %s: %w", godir, bakgo, err)
 		}
 	}
 	if err = archiver.Unarchive(tmpfile, *destGoDir); err != nil {
-		return fmt.Errorf("can't unpack %s to %s: %v", tmpfile, godir, err)
+		return fmt.Errorf("can't unpack %s to %s: %w", tmpfile, godir, err)
 	}
 	if _, err = os.Stat(godir); err != nil {
 		return fmt.Errorf("problem unpacking to %s, old go version is in %s", godir, bakgo)
@@ -305,7 +306,7 @@ func downloadAndInstall(dl *GoDownload) error {
 		fmt.Fprintf(os.Stderr, "couldn't remove old Go version in %s: %v", bakgo, err)
 	}
 	if err = fixPermissions(godir); err != nil {
-		return fmt.Errorf("error installing: %v", err)
+		return fmt.Errorf("error installing: %w", err)
 	}
 	fmt.Println("Go upgraded successfully")
 	return nil
