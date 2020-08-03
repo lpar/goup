@@ -27,7 +27,7 @@ It should work for macOS and Linux, patches for Windows compatibility would be w
  
  - Checks byte count of download
 
- - Not a crufty shell script
+ - Not a shell script
  
  - Sets read permissions on unpacked files for use from `sudo`
  
@@ -44,5 +44,5 @@ It should work for macOS and Linux, patches for Windows compatibility would be w
  - If the Go team distributes a tar file that doesn't have everything under a top level "go" directory, it'll fail 
    (and leave junk in your destination directory).
 
- - Doesn't attempt to manage having multiple different versions of Go installed at the same time.
+ - Doesn't attempt to manage having multiple different versions of Go installed at the same time. If you need that, try [gvm](https://github.com/moovweb/gvm) or use `go get` to [install specific versions](https://golang.org/doc/install#extra_versions).
  
