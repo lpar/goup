@@ -27,13 +27,18 @@ It should work for macOS and Linux, patches for Windows compatibility would be w
  
  - Checks byte count of download
 
- - Not a shell script
+ - Not a shell script and doesn't encourage you to do `curl ... | sh`
  
  - Sets read permissions on unpacked files for use from `sudo`
  
- - Allows you to override arch or OS
+ - Allows you to override arch or OS (see `--help`)
  
- - Now usable for initial install, if you have a built binary of it
+ - Usable for initial install, if you [download  a built binary](https://github.com/lpar/goup/releases)
+
+ - Doesn't attempt to manage having multiple different versions of Go
+   installed, because that's already supported by the standard `go get` command
+   once you have the latest version installed. See [ the Go
+   documentation](https://golang.org/doc/install#extra_versions) for details.
  
 ## Bugs and limitations
 
@@ -41,8 +46,7 @@ It should work for macOS and Linux, patches for Windows compatibility would be w
 
  - Doesn't work on Windows yet.
 
- - If the Go team distributes a tar file that doesn't have everything under a top level "go" directory, it'll fail 
-   (and leave junk in your destination directory).
+ - If the Go team distributes a tar file that doesn't have everything under a
+   top level "go" directory, it'll fail (and leave junk in your destination
+   directory).
 
- - Doesn't attempt to manage having multiple different versions of Go installed at the same time. If you need that, try [gvm](https://github.com/moovweb/gvm) or use `go get` to [install specific versions](https://golang.org/doc/install#extra_versions).
- 
