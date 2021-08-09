@@ -22,17 +22,23 @@ import (
 	"github.com/lpar/goup/semver"
 )
 
-const destDir = "/usr/local"
-const clientTimeout = 5 * 60 * time.Second
+const (
+	destDir       = "/usr/local"
+	clientTimeout = 5 * 60 * time.Second
+)
 
-const dlBase = "https://dl.google.com/go/"
-const dlJSONfeed = "https://golang.org/dl/?mode=json"
+const (
+	dlBase     = "https://dl.google.com/go/"
+	dlJSONfeed = "https://golang.org/dl/?mode=json"
+)
 
-var unstable = flag.Bool("unstable", false, "include unstable (beta, rc) versions")
-var specOS = flag.String("os", "", "specify OS (darwin/freebsd/linux)")
-var specArch = flag.String("arch", "", "specify architecture (amd64/arm64/386/ppc64le/s390x/armv6l)")
-var force = flag.Bool("force", false, "force download even if current version up-to-date")
-var destGoDir = flag.String("dir", destDir, "destination for go directory (default /usr/local)")
+var (
+	unstable  = flag.Bool("unstable", false, "include unstable (beta, rc) versions")
+	specOS    = flag.String("os", "", "specify OS (darwin/freebsd/linux)")
+	specArch  = flag.String("arch", "", "specify architecture (amd64/arm64/386/ppc64le/s390x/armv6l)")
+	force     = flag.Bool("force", false, "force download even if current version up-to-date")
+	destGoDir = flag.String("dir", destDir, "destination for go directory (default /usr/local)")
+)
 
 // GoDownload represents a download of Go for a specific OS and architecture
 type GoDownload struct {
@@ -190,7 +196,6 @@ func main() {
 	if err != nil {
 		fmt.Printf("Error: %v\n", err)
 	}
-
 }
 
 // Download a file and return the temporary filename where it's stored and its SHA256 checksum.
@@ -214,7 +219,7 @@ func downloadFile(dl *GoDownload) (string, string, error) {
 	fname := filepath.Base(u.Path)
 	fmt.Printf("Downloading %s\n", fname)
 	tmpfile = path.Join(os.TempDir(), fname)
-	fp, err := os.OpenFile(tmpfile, os.O_CREATE|os.O_RDWR|os.O_APPEND, 0600)
+	fp, err := os.OpenFile(tmpfile, os.O_CREATE|os.O_RDWR|os.O_APPEND, 0o600)
 	if err != nil {
 		cleanup()
 		return tmpfile, ssha, fmt.Errorf("can't open temporary file %s: %w", tmpfile, err)
@@ -263,9 +268,9 @@ func downloadFile(dl *GoDownload) (string, string, error) {
 func fixPermissions(root string) error {
 	return filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
 		perms := info.Mode()
-		perms = (perms & 0777) | 0444
+		perms = (perms & 0o777) | 0o444
 		if info.IsDir() {
-			perms = perms | 0111
+			perms = perms | 0o111
 		}
 		cherr := os.Chmod(path, perms)
 		if cherr != nil {
