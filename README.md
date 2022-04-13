@@ -52,6 +52,6 @@ It should work for macOS and Linux, patches for Windows compatibility would be w
 
  - Doesn't handle multiple versions. If you want to use multiple versions of Go, install the latest one, then use Go's regular features to handle it:
 
-    go get golang.org/dl/go1.16.1
+    go get golang.org/dl/go1.16.1  
     go1.16.1 build
 
