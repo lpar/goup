@@ -55,3 +55,5 @@ It should work for macOS and Linux, patches for Windows compatibility would be w
     go get golang.org/dl/go1.16.1  
     go1.16.1 build
 
+   If you want something which can switch versions for you automatically for different projects, I suggest [rtx](https://github.com/jdxcode/rtx).
+
