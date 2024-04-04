@@ -16,7 +16,7 @@ import (
 	"sort"
 	"time"
 
-	"github.com/mholt/archiver"
+	"github.com/mholt/archiver/v3"
 	flag "github.com/spf13/pflag"
 
 	"github.com/lpar/goup/semver"

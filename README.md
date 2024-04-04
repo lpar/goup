@@ -15,7 +15,7 @@ This is a quick Go program to install or upgrade your Go runtime by downloading 
     go version go1.10.3 linux/amd64
     %
 
-It should work for macOS and Linux, patches for Windows compatibility would be welcomed.
+It works for macOS and Linux, patches for Windows compatibility would be welcomed.
 
 ## Features
 
@@ -37,7 +37,7 @@ It should work for macOS and Linux, patches for Windows compatibility would be w
 
  - Doesn't attempt to manage having multiple different versions of Go
    installed, because that's already supported by the standard `go get` command
-   once you have the latest version installed. See [ the Go
+   once you have the latest version installed. See [the Go
    documentation](https://golang.org/doc/install#extra_versions) for details.
  
 ## Bugs and limitations
@@ -52,8 +52,8 @@ It should work for macOS and Linux, patches for Windows compatibility would be w
 
  - Doesn't handle multiple versions. If you want to use multiple versions of Go, install the latest one, then use Go's regular features to handle it:
 
-    go get golang.org/dl/go1.16.1  
-    go1.16.1 build
+    go get golang.org/dl/go1.21.1  
+    go1.21.1 build
 
-   If you want something which can switch versions for you automatically for different projects, I suggest [rtx](https://github.com/jdxcode/rtx).
+   If you want something which can switch versions for you automatically for different projects, you could try [asdf](https://asdf-vm.com/).
 
