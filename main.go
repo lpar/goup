@@ -144,11 +144,11 @@ func main() {
 	}
 	if *specArch != "" {
 		targetArch = *specArch
-		fmt.Printf("Using architecture %s as specified on command line", targetArch)
+		fmt.Printf("Using architecture %s as specified on command line\n", targetArch)
 	}
 	if *specOS != "" {
 		targetOS = *specOS
-		fmt.Printf("Using OS %s as specified on command line", targetOS)
+		fmt.Printf("Using OS %s as specified on command line\n", targetOS)
 	}
 
 	if targetOS == "" || targetArch == "" {
@@ -160,7 +160,7 @@ func main() {
 
 	newVersion, newDownload, err := pickBestVersion(targetOS, targetArch)
 	if err != nil {
-		fmt.Printf("Couldn't check for new versions: %v", err)
+		fmt.Printf("Couldn't check for new versions: %v\n", err)
 		return
 	}
 	newSemVer := semver.NewSemVer(newVersion.Version)
